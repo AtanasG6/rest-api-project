@@ -20,12 +20,23 @@ npm install
 
 ## Конфигурация
 
-Създай `.env` файл в root директорията (вече съществува):
+Копирай `.env.example` като `.env`:
+
+```bash
+cp .env.example .env
+```
+
+Или създай `.env` файл ръчно в root директорията:
 
 ```env
-JWT_SECRET=your_super_secret_jwt_key_change_this_in_production_12345
+JWT_SECRET=your_super_secret_jwt_key_change_this_in_production
 PORT=3000
 ```
+
+**Важно:**
+- `.env` файлът не е включен в Git repository (добавен в .gitignore)
+- Промени `JWT_SECRET` със собствен random string за production
+- `.env.example` файлът служи като template
 
 ## Стартиране
 
@@ -200,7 +211,8 @@ rest-api-project/
 ├── database.js              # Database setup
 ├── server.js                # Express server & routes
 ├── package.json             # Dependencies
-├── .env                     # Environment variables
+├── .env.example             # Environment variables template
+├── .env                     # Environment variables (not in Git)
 ├── .gitignore              # Git ignore rules
 └── REST-API.postman_collection.json  # Postman collection
 ```
