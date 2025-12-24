@@ -1,11 +1,30 @@
 # REST API Project
 
-Прост REST API с Express.js и SQLite база данни.
+REST API с Express.js, SQLite и JWT Authentication.
+
+## Характеристики
+
+- ✅ Express.js сървър
+- ✅ SQLite база данни
+- ✅ JWT Authentication
+- ✅ Bcrypt password hashing
+- ✅ Protected API endpoints
+- ✅ CORS enabled
+- ✅ Postman collection
 
 ## Инсталация
 
 ```bash
 npm install
+```
+
+## Конфигурация
+
+Създай `.env` файл в root директорията (вече съществува):
+
+```env
+JWT_SECRET=your_super_secret_jwt_key_change_this_in_production_12345
+PORT=3000
 ```
 
 ## Стартиране
@@ -14,22 +33,178 @@ npm install
 npm start
 ```
 
+Сървърът ще стартира на `http://localhost:3000`
+
 ## API Endpoints
 
-- `GET /api/users` - Вземане на всички потребители
-- `GET /api/users/:id` - Вземане на потребител по ID
-- `POST /api/users` - Създаване на нов потребител
-- `PUT /api/users/:id` - Обновяване на потребител
-- `DELETE /api/users/:id` - Изтриване на потребител
+### Authentication Endpoints (Public)
 
-## Пример заявка
+#### Register
+```http
+POST /api/auth/register
+Content-Type: application/json
 
-```bash
-# Създаване на потребител
-curl -X POST http://localhost:3000/api/users \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Ivan","email":"ivan@example.com"}'
-
-# Вземане на всички потребители
-curl http://localhost:3000/api/users
+{
+  "name": "Ivan Petrov",
+  "email": "ivan@example.com",
+  "password": "password123"
+}
 ```
+
+**Response:**
+```json
+{
+  "message": "User registered successfully",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": 1,
+    "name": "Ivan Petrov",
+    "email": "ivan@example.com"
+  }
+}
+```
+
+#### Login
+```http
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "email": "ivan@example.com",
+  "password": "password123"
+}
+```
+
+**Response:**
+```json
+{
+  "message": "Login successful",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": 1,
+    "name": "Ivan Petrov",
+    "email": "ivan@example.com"
+  }
+}
+```
+
+### User Endpoints (Protected - Require JWT Token)
+
+Всички user endpoints изискват JWT token в Authorization header:
+```
+Authorization: Bearer <your-jwt-token>
+```
+
+#### Get All Users
+```http
+GET /api/users
+Authorization: Bearer <token>
+```
+
+#### Get User by ID
+```http
+GET /api/users/:id
+Authorization: Bearer <token>
+```
+
+#### Update User
+```http
+PUT /api/users/:id
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "name": "Ivan Georgiev",
+  "email": "ivan.georgiev@example.com"
+}
+```
+
+#### Delete User
+```http
+DELETE /api/users/:id
+Authorization: Bearer <token>
+```
+
+## Примери със cURL
+
+### Регистрация
+```bash
+curl -X POST http://localhost:3000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Ivan Petrov","email":"ivan@example.com","password":"password123"}'
+```
+
+### Login
+```bash
+curl -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"ivan@example.com","password":"password123"}'
+```
+
+### Get All Users (с token)
+```bash
+curl http://localhost:3000/api/users \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN_HERE"
+```
+
+## Postman Collection
+
+В проекта е включена Postman колекция: `REST-API.postman_collection.json`
+
+### Импортиране в Postman:
+1. Отвори Postman
+2. Кликни **Import**
+3. Избери файла `REST-API.postman_collection.json`
+4. Колекцията автоматично управлява JWT токените
+
+### Как работи:
+- Когато направиш **Register** или **Login**, токенът се запазва автоматично
+- Всички protected endpoints автоматично използват запазения токен
+- Не е нужно ръчно да копираш/поставяш токена
+
+## Database Schema
+
+### Users Table
+```sql
+CREATE TABLE users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  email TEXT UNIQUE NOT NULL,
+  password TEXT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+)
+```
+
+## Security
+
+- Паролите се хешират с **bcryptjs** (10 salt rounds)
+- JWT токените са валидни **24 часа**
+- Password validation: минимум **6 символа**
+- Email uniqueness проверка
+
+## Tech Stack
+
+- **Express.js** - Web framework
+- **better-sqlite3** - SQLite database
+- **jsonwebtoken** - JWT authentication
+- **bcryptjs** - Password hashing
+- **cors** - CORS middleware
+- **dotenv** - Environment variables
+
+## Project Structure
+
+```
+rest-api-project/
+├── middleware/
+│   └── authMiddleware.js    # JWT verification middleware
+├── database.js              # Database setup
+├── server.js                # Express server & routes
+├── package.json             # Dependencies
+├── .env                     # Environment variables
+├── .gitignore              # Git ignore rules
+└── REST-API.postman_collection.json  # Postman collection
+```
+
+## License
+
+ISC
